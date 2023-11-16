@@ -1,26 +1,6 @@
-# Copyright 2020 Google LLC
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#      http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-
-# Lint as: python3
-"""Fine-tune a BiT model on some downstream dataset."""
-#!/usr/bin/env python3
-# coding: utf-8
 import os
 from os.path import join as pjoin  # pylint: disable=g-importing-member
 from argparse import ArgumentParser
-from sklearn.metrics import roc_auc_score,confusion_matrix
-from Delong import delong_roc_variance
 import scipy.stats as stats
 import math
 
@@ -30,7 +10,7 @@ import torch.nn as nn
 import torchvision as tv
 
 import models as models
-from Data.MyDataset1 import MyDataset
+from MyDataset1 import MyDataset
 
 import bit_hyperrule
 
@@ -52,24 +32,16 @@ def mktrainval(args):
 
     micro_batch_size = args.batch
 
-    # 设置pin_memory为真的时候，数据转到GPU显存的速度可以更快
     test_loader = torch.utils.data.DataLoader(
         test_set, batch_size=micro_batch_size, shuffle=False,
         num_workers=args.workers, pin_memory=True, drop_last=False)
     
-    if micro_batch_size <= len(train_set):
-      train_loader = torch.utils.data.DataLoader(
-          train_set, batch_size=micro_batch_size, shuffle=True,
-          num_workers=args.workers, pin_memory=True, drop_last=False)
-    else:
-      # In the few-shot cases, the total dataset size might be smaller than the batch-size.
-      # In these cases, the default sampler doesn't repeat, so we need to make it do that
-      # if we want to match the behaviour from the paper.
-      train_loader = torch.utils.data.DataLoader(
-          train_set, batch_size=micro_batch_size, num_workers=args.workers, pin_memory=True,
-          sampler=torch.utils.data.RandomSampler(train_set, replacement=True, num_samples=micro_batch_size))
+
+    train_loader = torch.utils.data.DataLoader(
+        train_set, batch_size=micro_batch_size, shuffle=True,
+        num_workers=args.workers, pin_memory=True, drop_last=False)
     
-    return train_set, train_loader, test_set, test_loader
+    return train_loader, test_loader
 
 def Delong(outcome,pred):
     alpha = .95
