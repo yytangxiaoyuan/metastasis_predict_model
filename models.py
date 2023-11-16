@@ -189,10 +189,3 @@ KNOWN_MODELS = OrderedDict([
     ('BiT-S-R152x2', lambda *a, **kw: ResNetV2([3, 8, 36, 3], 2, *a, **kw)),
     ('BiT-S-R152x4', lambda *a, **kw: ResNetV2([3, 8, 36, 3], 4, *a, **kw)),
 ])
-
-# if __name__ == '__main__':
-#     model = KNOWN_MODELS['BiT-M-R50x1'](head_size=2, zero_head=True)
-#     print(model)
-#     img = torch.randn(4, 3, 128, 128)
-#     output = model.head(model.body(model.root(img)))
-#     print(output.shape)  # (4,128)
